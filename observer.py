@@ -160,7 +160,7 @@ async def on_message(message):
     return
   
   # メッセージ送信をした際のデータベース処理
-  database.chat(author.name)
+  database.chat(author.name, content)
   level = database.return_level(author.name)
   chat = database.return_chat(author.name)
   if Other.check_update_level(level, chat): # レベルアップ出来る場合

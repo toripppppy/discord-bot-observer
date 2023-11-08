@@ -8,9 +8,14 @@ class Database:
     print("Database loading complete!!")
     self.log()
   
-  def chat(self, author): # chatを増やす
+  def chat(self, author, content): # chatとlengthを更新
     query = {"name": author}
     self.collection.update_one(query, {"$inc": {"chat": 1}})
+    
+    if "https://" in content or "http://" in content: return # URLが含まれていた場合
+    if "```" in content: return                              # コードブロックが含まれていた場合
+    
+    self.collection.update_one(query, {"$inc": {"length": len(content)}})
   
   def update_level(self, author, ):
     query = {"name": author}
