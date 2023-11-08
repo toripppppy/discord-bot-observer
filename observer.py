@@ -24,6 +24,7 @@ async def data(message, id):
     text += f"・現在のポイント：{data['point']}\n"
     text += f"・現在のレベル　：{data['level']}\n"
     text += f"・合計チャット数：{data['chat']}\n"
+    text += f"・合計文字数　　：{data['length']}\n"
     text += "="* (20 + len(data['name']))
     embed = Data.BASE_EMBED.copy()
     embed.description = text
@@ -162,6 +163,9 @@ async def on_message(message):
     if all([author.name == Data.ADMIN_ID, message.channel.id == Data.ADMIN_CHANNEL_ID]):
       await admin_router(message, content_split)
     return
+  
+  # アドミンサーバーの場合
+  if message.guild.id == Data.ADMIN_GUILD_ID: return
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name, content)
