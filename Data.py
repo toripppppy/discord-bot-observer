@@ -15,6 +15,9 @@ for text in os.getenv("CHANNEL_ID").split(","):
   value = int(value)
   CHANNEL_ID[key] = value
 
+ADMIN_GUILD_ID = int(os.getenv("ADMIN_GUILD_ID"))
+ADMIN_ID = os.getenv("ADMIN_ID")
+
 OBSERVER_HELP_DICT = {
   "observer help": "ヘルプを表示します",
   "observer data <id>": "<id>に該当する人のデータを表示します",

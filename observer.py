@@ -145,7 +145,8 @@ async def on_message(message):
   # Botだった場合
   if author.bot: return
   
-  print(message.guild.id)
+  if author.name == Data.ADMIN_ID and message.guild.id == Data.ADMIN_GUILD_ID: 
+    print("Hello Admin!!")
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name)
