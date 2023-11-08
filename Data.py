@@ -9,13 +9,7 @@ MONGODB_URI = os.getenv("MONGODB_URI")
 
 ID_LIST = os.getenv("ID_LIST").split(",")
 
-CHANNEL_ID = dict()
-for text in os.getenv("CHANNEL_ID").split(","):
-  key, value = text.split(":")
-  value = int(value)
-  CHANNEL_ID[key] = value
-
-BOT_CHANNEL_ID = int(os.getenv("BOT_CHANNEL_ID"))
+BOT_LOG_CHANNEL_ID = int(os.getenv("BOT_LOG_CHANNEL_ID"))
 
 ADMIN_GUILD_ID = int(os.getenv("ADMIN_GUILD_ID"))
 ADMIN_CHANNEL_ID = int(os.getenv("ADMIN_CHANNEL_ID"))

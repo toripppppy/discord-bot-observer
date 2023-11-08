@@ -23,7 +23,8 @@ async def data(message, id):
     text += f"========== {data['name']} ==========\n"
     text += f"・現在のポイント：{data['point']}\n"
     text += f"・現在のレベル　：{data['level']}\n"
-    text += f"・合計チャット数：{data['number-of-message']}\n"
+    text += f"・合計チャット数：{data['chat']}\n"
+    text += f"・合計文字数　　：{data['length']}\n"
     text += "="* (20 + len(data['name']))
     embed = Data.BASE_EMBED.copy()
     embed.description = text
@@ -129,7 +130,7 @@ async def admin_router(message, command):
     embed = Data.BASE_EMBED.copy()
     embed.description = "終了します。"
     embed.color = Data.EMBED_COLOR_YELLOW
-    channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
+    channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
     await discord_client.close()
 
@@ -140,7 +141,7 @@ async def on_ready():
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
-  channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
+  channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
@@ -148,6 +149,10 @@ async def on_ready():
 async def on_message(message):
   author = message.author
   content = message.content
+  
+  # メッセージが空（写真）の場合
+  if not content: return
+  
   content_split = list(map(str.lower ,content.split()))
   
   # Botだった場合
@@ -159,15 +164,20 @@ async def on_message(message):
       await admin_router(message, content_split)
     return
   
+  # アドミンサーバーの場合
+  if message.guild.id == Data.ADMIN_GUILD_ID: return
+  
   # メッセージ送信をした際のデータベース処理
-  database.chat(author.name)
+  database.chat(author.name, content)
   level = database.return_level(author.name)
-  number_of_message = database.return_number_of_message(author.name)
-  if Other.check_update_level(level, number_of_message): # レベルアップ出来る場合
-    database.update_level(author.name)
+  chat = database.return_chat(author.name)
+  length = database.return_length(author.name)
+  level_up_cnt = Other.return_level_up_cnt(level, chat, length)
+  if level_up_cnt > 0: # レベルアップした場合
+    database.update_level(author.name, level_up_cnt)
     embed = Data.BASE_EMBED.copy()
     embed.color = Data.EMBED_COLOR_GREEN
-    embed.description = f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+1}）"
+    embed.description = f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）"
     await message.channel.send(embed = embed)
   database.log()
   

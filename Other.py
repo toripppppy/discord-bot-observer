@@ -11,8 +11,6 @@ def check_width(string) -> int:
       count += 1
   return count
 
-def check_update_level(level, number_of_message) -> bool:
-  if level != isqrt(number_of_message):
-    return True
-  else:
-    return False
+def return_level_up_cnt(level, chat, length):
+  new_level = isqrt(chat + (length // 10))
+  return new_level - level
