@@ -50,7 +50,7 @@ class Database:
     print("=" * 60, self.collection.name, "=" * 60)
     for data in self.collection.find():
       print(data)
-    print("=" * (120 + 2 + len(self.collection.name)))
+    print("=" * (120 + 2 + len(self.collection.name)), flush = True)
   
   def close(self):
     self.mongo_client.close()
