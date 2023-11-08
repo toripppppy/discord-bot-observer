@@ -18,6 +18,7 @@ for text in os.getenv("CHANNEL_ID").split(","):
 BOT_CHANNEL_ID = int(os.getenv("BOT_CHANNEL_ID"))
 
 ADMIN_GUILD_ID = int(os.getenv("ADMIN_GUILD_ID"))
+ADMIN_CHANNEL_ID = int(os.getenv("ADMIN_CHANNEL_ID"))
 ADMIN_ID = os.getenv("ADMIN_ID")
 
 OBSERVER_HELP_DICT = {
