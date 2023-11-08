@@ -167,11 +167,13 @@ async def on_message(message):
   database.chat(author.name, content)
   level = database.return_level(author.name)
   chat = database.return_chat(author.name)
-  if Other.check_update_level(level, chat): # レベルアップ出来る場合
-    database.update_level(author.name)
+  length = database.return_length(author.name)
+  level_up_cnt = Other.return_level_up_cnt(level, chat, length)
+  if level_up_cnt > 0: # レベルアップした場合
+    database.update_level(author.name, level_up_cnt)
     embed = Data.BASE_EMBED.copy()
     embed.color = Data.EMBED_COLOR_GREEN
-    embed.description = f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+1}）"
+    embed.description = f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）"
     await message.channel.send(embed = embed)
   database.log()
   

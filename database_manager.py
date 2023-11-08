@@ -17,9 +17,9 @@ class Database:
     
     self.collection.update_one(query, {"$inc": {"length": len(content)}})
   
-  def update_level(self, author, ):
+  def update_level(self, author, level_up_cnt):
     query = {"name": author}
-    self.collection.update_one(query, {"$inc": {"level": 1}})
+    self.collection.update_one(query, {"$inc": {"level": level_up_cnt}})
   
   def return_data(self, author):
     query = {"name": author}
@@ -42,6 +42,13 @@ class Database:
       return None
     else:
       return data["chat"]
+  
+  def return_length(self, author):
+    data = self.return_data(author)
+    if data == None:
+      return None
+    else:
+      return data["length"]
   
   def return_chat_ranking(self) -> dict:
     data = self.find()
