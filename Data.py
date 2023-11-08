@@ -15,7 +15,7 @@ for text in os.getenv("CHANNEL_ID").split(","):
   value = int(value)
   CHANNEL_ID[key] = value
 
-BOT_CHANNEL_ID = int(os.getenv("BOT_CHANNEL_ID"))
+BOT_LOG_CHANNEL_ID = int(os.getenv("BOT_LOG_CHANNEL_ID"))
 
 ADMIN_GUILD_ID = int(os.getenv("ADMIN_GUILD_ID"))
 ADMIN_CHANNEL_ID = int(os.getenv("ADMIN_CHANNEL_ID"))

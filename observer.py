@@ -129,7 +129,7 @@ async def admin_router(message, command):
     embed = Data.BASE_EMBED.copy()
     embed.description = "終了します。"
     embed.color = Data.EMBED_COLOR_YELLOW
-    channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
+    channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
     await discord_client.close()
 
@@ -140,7 +140,7 @@ async def on_ready():
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
-  channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
+  channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
