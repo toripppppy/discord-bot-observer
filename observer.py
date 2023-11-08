@@ -127,7 +127,7 @@ async def router(message, command):
 # 起動時に動作する処理
 @discord_client.event
 async def on_ready():
-  print('Log in : Observer')
+  print('Log in : Observer', flush = True)
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
