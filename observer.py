@@ -9,8 +9,6 @@ discord_client = discord.Client(intents=discord.Intents.all())
 # データベースの作成
 database = database_manager.Database(Data.MONGODB_URI, "discord", "user-data")
 
-bot_channel = input("bot_channel : ") # bot 通知用チャンネル
-
 # コマンドの関数
 async def help(message):
   embed = Data.BASE_EMBED.copy()
@@ -133,7 +131,7 @@ async def on_ready():
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
-  channel = discord_client.get_channel(Data.CHANNEL_ID[bot_channel])
+  channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
