@@ -123,6 +123,15 @@ async def router(message, command):
     embed.description = "無効なコマンドです。\n`observer help`でヘルプを表示できます。"
     await message.channel.send(embed = embed)
 
+# アドミンコマンドのルーティング
+async def admin_router(message, command):
+  if command[1] == "logout":
+    embed = Data.BASE_EMBED.copy()
+    embed.description = "終了します。"
+    embed.color = Data.EMBED_COLOR_YELLOW
+    channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
+    await channel.send(embed = embed)
+    await discord_client.close()
 
 # 起動時に動作する処理
 @discord_client.event
@@ -131,7 +140,7 @@ async def on_ready():
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
-  channel = discord_client.get_channel(Data.CHANNEL_ID[input()])
+  channel = discord_client.get_channel(Data.BOT_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
@@ -139,9 +148,16 @@ async def on_ready():
 async def on_message(message):
   author = message.author
   content = message.content
+  content_split = list(map(str.lower ,content.split()))
   
   # Botだった場合
   if author.bot: return
+  
+  # アドミンコマンドかの判定 & アドミンコマンドの実行
+  if content_split[0] == "admin" and len(content_split) >= 2:
+    if all([author.name == Data.ADMIN_ID, message.channel.id == Data.ADMIN_CHANNEL_ID]):
+      await admin_router(message, content_split)
+    return
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name)
@@ -156,7 +172,6 @@ async def on_message(message):
   database.log()
   
   # コマンドがあるかの判定 & コマンドの実行
-  content_split = list(map(str.lower ,content.split()))
   if content_split[0] == "observer" and len(content_split) >= 2:
     await router(message, content_split)
   elif content_split[0] == "observer":
