@@ -131,7 +131,7 @@ async def on_ready():
   embed = Data.BASE_EMBED.copy()
   embed.description = "起動しました。"
   embed.color = Data.EMBED_COLOR_YELLOW
-  channel = discord_client.get_channel(Data.CHANNEL_ID["雑談"])
+  channel = discord_client.get_channel(Data.CHANNEL_ID[input()])
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
