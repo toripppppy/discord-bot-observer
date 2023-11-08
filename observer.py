@@ -148,6 +148,10 @@ async def on_ready():
 async def on_message(message):
   author = message.author
   content = message.content
+  
+  # メッセージが空（写真）の場合
+  if not content: return
+  
   content_split = list(map(str.lower ,content.split()))
   
   # Botだった場合
