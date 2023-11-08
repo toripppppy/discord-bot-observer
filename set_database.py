@@ -38,8 +38,8 @@ def main():
   if do_reset_level == "y":
     reset_level()
   
-  do_message = input("reset_chat()(y/n): ")
-  if do_message == "y":
+  do_chat = input("reset_chat()(y/n): ")
+  if do_chat == "y":
     reset_chat()
   
   do_length = input("reset_length()(y/n): ")
