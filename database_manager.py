@@ -8,9 +8,9 @@ class Database:
     print("Database loading complete!!")
     self.log()
   
-  def chat(self, author): # number-of-messageを増やす
+  def chat(self, author): # chatを増やす
     query = {"name": author}
-    self.collection.update_one(query, {"$inc": {"number-of-message": 1}})
+    self.collection.update_one(query, {"$inc": {"chat": 1}})
   
   def update_level(self, author, ):
     query = {"name": author}
@@ -31,18 +31,18 @@ class Database:
     else:
       return data["level"]
   
-  def return_number_of_message(self, author):
+  def return_chat(self, author):
     data = self.return_data(author)
     if data == None:
       return None
     else:
-      return data["number-of-message"]
+      return data["chat"]
   
   def return_chat_ranking(self) -> dict:
     data = self.find()
     chat_data = dict()
     for d in data:
-      chat_data[d["name"]] = d["number-of-message"]
+      chat_data[d["name"]] = d["chat"]
     
     return chat_data
   

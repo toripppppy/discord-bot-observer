@@ -13,12 +13,12 @@ def reset_level():
     print("IDが見つかりませんでした。")
   database.log()
 
-def reset_number_of_message():
+def reset_chat():
   author = input("author: ")
   if author == "all":
-    database.collection.update_many({}, {"$set": {"number-of-message": 0}})
+    database.collection.update_many({}, {"$set": {"chat": 0}})
   elif author in Data.ID_LIST:
-    database.collection.update_one({"name": author}, {"$set": {"number-of-message": 0}})
+    database.collection.update_one({"name": author}, {"$set": {"chat": 0}})
   else:
     print("IDが見つかりませんでした。")
   database.log()
@@ -28,8 +28,8 @@ def main():
   if do_reset_level == "y":
     reset_level()
   
-  do_message = input("reset_number_of_message()(y/n): ")
+  do_message = input("reset_chat()(y/n): ")
   if do_message == "y":
-    reset_number_of_message()
+    reset_chat()
 
 main()

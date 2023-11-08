@@ -23,7 +23,7 @@ async def data(message, id):
     text += f"========== {data['name']} ==========\n"
     text += f"・現在のポイント：{data['point']}\n"
     text += f"・現在のレベル　：{data['level']}\n"
-    text += f"・合計チャット数：{data['number-of-message']}\n"
+    text += f"・合計チャット数：{data['chat']}\n"
     text += "="* (20 + len(data['name']))
     embed = Data.BASE_EMBED.copy()
     embed.description = text
@@ -162,8 +162,8 @@ async def on_message(message):
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name)
   level = database.return_level(author.name)
-  number_of_message = database.return_number_of_message(author.name)
-  if Other.check_update_level(level, number_of_message): # レベルアップ出来る場合
+  chat = database.return_chat(author.name)
+  if Other.check_update_level(level, chat): # レベルアップ出来る場合
     database.update_level(author.name)
     embed = Data.BASE_EMBED.copy()
     embed.color = Data.EMBED_COLOR_GREEN
