@@ -49,7 +49,7 @@ async def chat_ranking(message):
 # メンバー一覧を表示
 @bot.command(name="member", brief="サーバーのメンバーを表示します")
 async def member(message):
-  await message.channel.send(embed = Utils.create_chat_ranking_embed(message))
+  await message.channel.send(embed = Utils.create_member_list_embed(message))
 
 # アドミンコマンドのルーティング
 @bot.command(name="admin", hidden=True)

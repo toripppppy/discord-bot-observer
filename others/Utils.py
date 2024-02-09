@@ -70,7 +70,7 @@ def create_chat_ranking_embed(chat_data):
 
   return embed
 
-def create_member_list_text(message):
+def create_member_list_embed(message):
   """
   observer member
   ---
