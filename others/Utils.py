@@ -1,6 +1,6 @@
 from unicodedata import east_asian_width # 全角半角判定用
 from math import isqrt
-from others import Data
+from others import Data, Embed
 
 def check_width(string) -> int:
   "全角の文字を2文字としてカウントした文字数を返す"
@@ -15,6 +15,26 @@ def check_width(string) -> int:
 def return_level_up_cnt(level, chat, length):
   new_level = isqrt(chat + (length // 10))
   return new_level - level
+
+def create_help_embed(bot):
+  """
+  observer help
+  ---
+  ヘルプで表示するembedを返す
+  """
+  embed = Embed.make_embed()
+  for command in bot.all_commands.values():
+    # 隠しコマンドは表示しない
+    if command.hidden: continue
+    # nameを作成
+    name = bot.command_prefix + command.name
+    if command.params:
+      for param_name in command.params.keys():
+        name += f" <{param_name}>"
+
+    embed.add_field(name = name, value = command.brief, inline = False)
+
+  return embed
 
 def create_data_text(data: Data):
   """
@@ -39,7 +59,7 @@ def create_chat_ranking_text(chat_data):
   チャットランキングの表示テキストを返す
   """
   chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
-  
+
   text = "===== チャット数ランキング =====\n"
   for i, (name, chat) in enumerate(chat_data):
     text += f"　第{i+1}位：{name}（{chat}回）\n"

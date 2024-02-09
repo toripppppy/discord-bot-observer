@@ -14,11 +14,3 @@ BOT_LOG_CHANNEL_ID = int(os.getenv("BOT_LOG_CHANNEL_ID"))
 ADMIN_GUILD_ID = int(os.getenv("ADMIN_GUILD_ID"))
 ADMIN_CHANNEL_ID = int(os.getenv("ADMIN_CHANNEL_ID"))
 ADMIN_ID = os.getenv("ADMIN_ID")
-
-OBSERVER_HELP_DICT = {
-  "observer help": "ヘルプを表示します",
-  "observer data <id>": "<id>に該当する人のデータを表示します",
-  "observer data-all": "すべての人のデータを表示します",
-  "observer chat-ranking": "チャット数ランキングを表示します",
-  "observer member": "サーバーのメンバーを表示します",
-}

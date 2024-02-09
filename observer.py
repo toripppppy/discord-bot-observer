@@ -15,27 +15,23 @@ bot = commands.Bot(
 database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
 # ヘルプ
-@bot.command(name="help")
+@bot.command(name="help", brief="ヘルプを表示します")
 async def help(message):
-  print("help")
-  embed = Embed.make_embed()
-  for command, description in Config.OBSERVER_HELP_DICT.items():
-    embed.add_field(name = command, value = description, inline = False)
-  await message.channel.send(embed = embed)
+  await message.channel.send(embed = Utils.create_help_embed(bot))
 
 # 指定のユーザーデータを表示
-@bot.command(name="data")
-async def data(message, author):
-  data = database.return_data(author)
+@bot.command(name="data", brief="<user>に該当する人のデータを表示します")
+async def data(message, user):
+  data = database.return_data(user)
   if data:
     text = Utils.create_data_text(data)
     embed = Embed.make_embed(description=text)
   else:
-    embed = Embed.make_embed("red", f"「{author}」のデータは見つかりませんでした。")
+    embed = Embed.make_embed("red", f"「{user}」のデータは見つかりませんでした。")
   await message.channel.send(embed = embed)
 
 # ユーザーデータを全て表示
-@bot.command(name="data-all")
+@bot.command(name="data-all", brief="すべての人のデータを表示します")
 async def data_all(message):
   for member in message.guild.members:
     # Botだった場合
@@ -44,7 +40,7 @@ async def data_all(message):
     await data(message, member.name)
 
 # チャットランキングを表示
-@bot.command(name="chat-ranking")
+@bot.command(name="chat-ranking", brief="チャット数ランキングを表示します")
 async def chat_ranking(message):
   chat_data = database.return_chat_ranking()
   text = Utils.create_chat_ranking_text(chat_data)
@@ -52,14 +48,14 @@ async def chat_ranking(message):
   await message.channel.send(embed = embed)
 
 # メンバー一覧を表示
-@bot.command(name="member")
+@bot.command(name="member", brief="サーバーのメンバーを表示します")
 async def member(message):
   text = Utils.create_member_list_text(message)
   embed = Embed.make_embed(description=text)
   await message.channel.send(embed = embed)
 
 # アドミンコマンドのルーティング
-@bot.command(name="admin")
+@bot.command(name="admin", hidden=True)
 async def admin_router(ctx, arg = None):
   # 引数の指定がない場合は無視
   # TODO embedを出すべき
