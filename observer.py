@@ -11,7 +11,8 @@ database = database_manager.Database(Data.MONGODB_URI, "discord", "user-data")
 
 # コマンドの関数
 async def help(message):
-  embed = Data.BASE_EMBED.copy()
+  print("help")
+  embed = Other.make_embed()
   for command, description in Data.OBSERVER_HELP_DICT.items():
     embed.add_field(name = command, value = description, inline = False)
   await message.channel.send(embed = embed)
@@ -26,14 +27,10 @@ async def data(message, id):
     text += f"・合計チャット数：{data['chat']}\n"
     text += f"・合計文字数　　：{data['length']}\n"
     text += "="* (20 + len(data['name']))
-    embed = Data.BASE_EMBED.copy()
-    embed.description = text
-    await message.channel.send(embed = embed)
+    embed = Other.make_embed(description=text)
   else:
-    embed = Data.BASE_EMBED.copy()
-    embed.color = Data.EMBED_COLOR_RED
-    embed.description = f"「{id}」のデータは見つかりませんでした。"
-    await message.channel.send(embed = embed)
+    embed = Other.make_embed("red", f"「{id}」のデータは見つかりませんでした。")
+  await message.channel.send(embed = embed)
 
 async def data_all(message):
   for member in message.guild.members:
@@ -49,8 +46,7 @@ async def chat_ranking(message):
   for i, (name, chat) in enumerate(chat_data):
     text += f"　第{i+1}位：{name}（{chat}回）\n"
   text += "=" * (20 + 1 + len("チャット数ランキング"))
-  embed = Data.BASE_EMBED.copy()
-  embed.description = text
+  embed = Other.make_embed(description=text)
   await message.channel.send(embed = embed)
 
 async def member(message):
@@ -102,8 +98,7 @@ async def member(message):
   output_text += text
   output_text += "=" * (max_string_length - 1)
   
-  embed = Data.BASE_EMBED.copy()
-  embed.description = output_text
+  embed = Other.make_embed(description=output_text)
   await message.channel.send(embed = embed)
 
 # コマンドのルーティング
@@ -119,17 +114,13 @@ async def router(message, command):
   elif command[1] == "member":
     await member(message)
   else:
-    embed = Data.BASE_EMBED.copy()
-    embed.color = Data.EMBED_COLOR_RED
-    embed.description = "無効なコマンドです。\n`observer help`でヘルプを表示できます。"
+    embed = Other.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
     await message.channel.send(embed = embed)
 
 # アドミンコマンドのルーティング
 async def admin_router(message, command):
   if command[1] == "logout":
-    embed = Data.BASE_EMBED.copy()
-    embed.description = "終了します。"
-    embed.color = Data.EMBED_COLOR_YELLOW
+    embed = Other.make_embed("yellow", "終了します。")
     channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
     await discord_client.close()
@@ -138,9 +129,7 @@ async def admin_router(message, command):
 @discord_client.event
 async def on_ready():
   print('Log in : Observer', flush = True)
-  embed = Data.BASE_EMBED.copy()
-  embed.description = "起動しました。"
-  embed.color = Data.EMBED_COLOR_YELLOW
+  embed = Other.make_embed("yellow", "起動しました。")
   channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
@@ -175,9 +164,7 @@ async def on_message(message):
   level_up_cnt = Other.return_level_up_cnt(level, chat, length)
   if level_up_cnt > 0: # レベルアップした場合
     database.update_level(author.name, level_up_cnt)
-    embed = Data.BASE_EMBED.copy()
-    embed.color = Data.EMBED_COLOR_GREEN
-    embed.description = f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）"
+    embed = Other.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）")
     await message.channel.send(embed = embed)
   database.log()
   
@@ -185,9 +172,7 @@ async def on_message(message):
   if content_split[0] == "observer" and len(content_split) >= 2:
     await router(message, content_split)
   elif content_split[0] == "observer":
-    embed = Data.BASE_EMBED.copy()
-    embed.color = Data.EMBED_COLOR_RED
-    embed.description = "無効なコマンドです。\n`observer help`でヘルプを表示できます。"
+    embed = Other.make_embed("red", "無効なコマンドです。\n`observer help`でヘルプを表示できます。")
     await message.channel.send(embed = embed)
 
 def main():
