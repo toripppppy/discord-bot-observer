@@ -2,18 +2,19 @@ import discord
 from discord.ext import commands
 import Config
 import database_manager
-from others import Embed, ObserverHelpCommand, Utils
+from others import Embed, Utils
 
 # 接続に必要なオブジェクトを生成
 bot = commands.Bot(
   command_prefix="observer ",
-  intents=discord.Intents.all()
+  intents=discord.Intents.all(),
+  help_command=None
 )
 
 # データベースの作成
 database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
-@bot.command(name="help2")
+@bot.command(name="help")
 async def help(message):
   print("help")
   embed = Embed.make_embed()
@@ -21,7 +22,7 @@ async def help(message):
     embed.add_field(name = command, value = description, inline = False)
   await message.channel.send(embed = embed)
 
-@bot.command()
+@bot.command(name="data")
 async def data(message, author):
   data = database.return_data(author)
   if data:
@@ -31,7 +32,7 @@ async def data(message, author):
     embed = Embed.make_embed("red", f"「{author}」のデータは見つかりませんでした。")
   await message.channel.send(embed = embed)
 
-@bot.command()
+@bot.command(name="data-all")
 async def data_all(message):
   for member in message.guild.members:
     # Botだった場合
@@ -39,7 +40,7 @@ async def data_all(message):
     # data関数を呼び出す
     await data(message, member.name)
 
-@bot.command()
+@bot.command(name="chat-ranking")
 async def chat_ranking(message):
   chat_data = database.return_chat_ranking()
   chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
@@ -50,7 +51,7 @@ async def chat_ranking(message):
   embed = Embed.make_embed(description=text)
   await message.channel.send(embed = embed)
 
-@bot.command()
+@bot.command(name="member")
 async def member(message):
   max_string_length = 0 # 動的に[=]の文字数を変更するための変数
   text = ""             # for文で作成するテキスト
