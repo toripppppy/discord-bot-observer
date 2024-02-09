@@ -1,27 +1,28 @@
 import discord
-import Data
+import Config
 import database_manager
 import others.Utils as Utils
 import others.Embed as Embed
+from others import Data
 
 # 接続に必要なオブジェクトを生成
 discord_client = discord.Client(intents=discord.Intents.all())
 
 # データベースの作成
-database = database_manager.Database(Data.MONGODB_URI, "discord", "user-data")
+database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
 # コマンドの関数
 async def help(message):
   print("help")
   embed = Embed.make_embed()
-  for command, description in Data.OBSERVER_HELP_DICT.items():
+  for command, description in Config.OBSERVER_HELP_DICT.items():
     embed.add_field(name = command, value = description, inline = False)
   await message.channel.send(embed = embed)
 
 async def data(message, author):
   data = database.return_data(author)
   if data:
-    text = Utils.create_data_text_data_text(data)
+    text = Utils.create_data_text(data)
     embed = Embed.make_embed(description=text)
   else:
     embed = Embed.make_embed("red", f"「{author}」のデータは見つかりませんでした。")
@@ -116,7 +117,7 @@ async def router(message, command):
 async def admin_router(message, command):
   if command[1] == "logout":
     embed = Embed.make_embed("yellow", "終了します。")
-    channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
+    channel = discord_client.get_channel(Config.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
     await discord_client.close()
 
@@ -125,7 +126,7 @@ async def admin_router(message, command):
 async def on_ready():
   print('Log in : Observer', flush = True)
   embed = Embed.make_embed("yellow", "起動しました。")
-  channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
+  channel = discord_client.get_channel(Config.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
@@ -144,12 +145,12 @@ async def on_message(message):
   
   # アドミンコマンドかの判定 & アドミンコマンドの実行
   if content_split[0] == "admin" and len(content_split) >= 2:
-    if all([author.name == Data.ADMIN_ID, message.channel.id == Data.ADMIN_CHANNEL_ID]):
+    if all([author.name == Config.ADMIN_ID, message.channel.id == Config.ADMIN_CHANNEL_ID]):
       await admin_router(message, content_split)
     return
   
   # アドミンサーバーの場合
-  if message.guild.id == Data.ADMIN_GUILD_ID: return
+  if message.guild.id == Config.ADMIN_GUILD_ID: return
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name, content)
@@ -173,7 +174,7 @@ async def on_message(message):
 def main():
   # Botの起動とDiscordサーバーへの接続
   try:
-    discord_client.run(Data.OBSERVER_TOKEN)
+    discord_client.run(Config.OBSERVER_TOKEN)
   finally: # サーバーを閉じた時（Ctrl + C）に動く処理
     database.close()
     print("Log out : Observer")

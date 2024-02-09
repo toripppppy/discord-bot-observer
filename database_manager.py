@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from others import Data
 
 class Database:
   def __init__(self, URI, db_name, col_name):
@@ -21,34 +22,40 @@ class Database:
     query = {"name": author}
     self.collection.update_one(query, {"$inc": {"level": level_up_cnt}})
   
-  def return_data(self, author):
+  def return_data(self, author) -> Data:
     query = {"name": author}
     data = self.collection.find_one(query)
-    if data == None:
-      return None
+    if data is None:
+      raise f"Error: Data is None. Does '{author}' exist?"
     else:
-      return data
+      return Data(
+        name=data["name"],
+        point=data["point"],
+        level=data["level"],
+        chat=data["chat"],
+        length=data["length"]
+      )
   
   def return_level(self, author):
     data = self.return_data(author)
     if data == None:
       return None
     else:
-      return data["level"]
+      return data.level
   
   def return_chat(self, author):
     data = self.return_data(author)
     if data == None:
       return None
     else:
-      return data["chat"]
+      return data.chat
   
   def return_length(self, author):
     data = self.return_data(author)
     if data == None:
       return None
     else:
-      return data["length"]
+      return data.length
   
   def return_chat_ranking(self) -> dict:
     data = self.find()
