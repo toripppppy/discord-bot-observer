@@ -14,6 +14,7 @@ bot = commands.Bot(
 # データベースの作成
 database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
+# ヘルプ
 @bot.command(name="help")
 async def help(message):
   print("help")
@@ -22,6 +23,7 @@ async def help(message):
     embed.add_field(name = command, value = description, inline = False)
   await message.channel.send(embed = embed)
 
+# 指定のユーザーデータを表示
 @bot.command(name="data")
 async def data(message, author):
   data = database.return_data(author)
@@ -32,6 +34,7 @@ async def data(message, author):
     embed = Embed.make_embed("red", f"「{author}」のデータは見つかりませんでした。")
   await message.channel.send(embed = embed)
 
+# ユーザーデータを全て表示
 @bot.command(name="data-all")
 async def data_all(message):
   for member in message.guild.members:
@@ -40,14 +43,11 @@ async def data_all(message):
     # data関数を呼び出す
     await data(message, member.name)
 
+# チャットランキングを表示
 @bot.command(name="chat-ranking")
 async def chat_ranking(message):
   chat_data = database.return_chat_ranking()
-  chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
-  text = "===== チャット数ランキング =====\n"
-  for i, (name, chat) in enumerate(chat_data):
-    text += f"　第{i+1}位：{name}（{chat}回）\n"
-  text += "=" * (20 + 1 + len("チャット数ランキング"))
+  text = Utils.create_chat_ranking_text(chat_data)
   embed = Embed.make_embed(description=text)
   await message.channel.send(embed = embed)
 

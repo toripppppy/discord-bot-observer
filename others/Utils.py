@@ -32,6 +32,21 @@ def create_data_text(data: Data):
 
   return text
 
+def create_chat_ranking_text(chat_data):
+  """
+  observer chat-ranking
+  ---
+  チャットランキングの表示テキストを返す
+  """
+  chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
+  
+  text = "===== チャット数ランキング =====\n"
+  for i, (name, chat) in enumerate(chat_data):
+    text += f"　第{i+1}位：{name}（{chat}回）\n"
+  text += "=" * (20 + 1 + len("チャット数ランキング"))
+  
+  return text
+
 def create_member_list_text(message):
   """
   observer member
