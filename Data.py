@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os
-import discord
 
 load_dotenv()
 
@@ -22,9 +21,3 @@ OBSERVER_HELP_DICT = {
   "observer chat-ranking": "チャット数ランキングを表示します",
   "observer member": "サーバーのメンバーを表示します",
 }
-
-EMBED_COLOR_WHITE = 0xF0F0FF
-EMBED_COLOR_YELLOW = 0xFFFF00
-EMBED_COLOR_RED = 0xFF0000
-EMBED_COLOR_GREEN = 0x00FF00
-BASE_EMBED = discord.Embed(title = "Observer", color = EMBED_COLOR_WHITE)
