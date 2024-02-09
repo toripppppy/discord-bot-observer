@@ -36,7 +36,7 @@ def create_help_embed(bot):
 
   return embed
 
-def create_data_text(data: Data):
+def create_data_embed(data: Data):
   """
   observer data(-all)
   ---
@@ -50,9 +50,10 @@ def create_data_text(data: Data):
   text += f"・合計文字数　　：{data.length}\n"
   text += "="* (20 + len(data.name))
 
-  return text
+  embed = Embed.make_embed(description=text)
+  return embed
 
-def create_chat_ranking_text(chat_data):
+def create_chat_ranking_embed(chat_data):
   """
   observer chat-ranking
   ---
@@ -65,7 +66,9 @@ def create_chat_ranking_text(chat_data):
     text += f"　第{i+1}位：{name}（{chat}回）\n"
   text += "=" * (20 + 1 + len("チャット数ランキング"))
   
-  return text
+  embed = Embed.make_embed(description=text)
+
+  return embed
 
 def create_member_list_text(message):
   """
@@ -121,4 +124,5 @@ def create_member_list_text(message):
   output_text += text
   output_text += "=" * (max_string_length - 1)
 
-  return output_text
+  embed = Embed.make_embed(description=output_text)
+  return embed

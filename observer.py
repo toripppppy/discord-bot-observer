@@ -24,10 +24,11 @@ async def help(message):
 async def data(message, user):
   data = database.return_data(user)
   if data:
-    text = Utils.create_data_text(data)
-    embed = Embed.make_embed(description=text)
+    embed = Utils.create_data_embed(data)
   else:
+    # 指定のユーザーが見つからない場合はエラー
     embed = Embed.make_embed("red", f"「{user}」のデータは見つかりませんでした。")
+    
   await message.channel.send(embed = embed)
 
 # ユーザーデータを全て表示
@@ -43,16 +44,12 @@ async def data_all(message):
 @bot.command(name="chat-ranking", brief="チャット数ランキングを表示します")
 async def chat_ranking(message):
   chat_data = database.return_chat_ranking()
-  text = Utils.create_chat_ranking_text(chat_data)
-  embed = Embed.make_embed(description=text)
-  await message.channel.send(embed = embed)
+  await message.channel.send(embed = Utils.create_chat_ranking_embed(chat_data))
 
 # メンバー一覧を表示
 @bot.command(name="member", brief="サーバーのメンバーを表示します")
 async def member(message):
-  text = Utils.create_member_list_text(message)
-  embed = Embed.make_embed(description=text)
-  await message.channel.send(embed = embed)
+  await message.channel.send(embed = Utils.create_chat_ranking_embed(message))
 
 # アドミンコマンドのルーティング
 @bot.command(name="admin", hidden=True)
