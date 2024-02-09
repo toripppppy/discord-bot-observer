@@ -26,7 +26,7 @@ class Database:
     query = {"name": author}
     data = self.collection.find_one(query)
     if data is None:
-      raise f"Error: Data is None. Does '{author}' exist?"
+      print(f"Error: Data is None. Does '{author}' exist?")
     else:
       return Data(
         name=data["name"],
