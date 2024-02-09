@@ -1,17 +1,19 @@
 import discord
+from discord.ext import commands
 import Config
 import database_manager
-import others.Utils as Utils
-import others.Embed as Embed
-from others import Data
+from others import Embed, ObserverHelpCommand, Utils
 
 # 接続に必要なオブジェクトを生成
-discord_client = discord.Client(intents=discord.Intents.all())
+bot = commands.Bot(
+  command_prefix="observer ",
+  intents=discord.Intents.all()
+)
 
 # データベースの作成
 database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
-# コマンドの関数
+@bot.command(name="help2")
 async def help(message):
   print("help")
   embed = Embed.make_embed()
@@ -19,6 +21,7 @@ async def help(message):
     embed.add_field(name = command, value = description, inline = False)
   await message.channel.send(embed = embed)
 
+@bot.command()
 async def data(message, author):
   data = database.return_data(author)
   if data:
@@ -28,6 +31,7 @@ async def data(message, author):
     embed = Embed.make_embed("red", f"「{author}」のデータは見つかりませんでした。")
   await message.channel.send(embed = embed)
 
+@bot.command()
 async def data_all(message):
   for member in message.guild.members:
     # Botだった場合
@@ -35,6 +39,7 @@ async def data_all(message):
     # data関数を呼び出す
     await data(message, member.name)
 
+@bot.command()
 async def chat_ranking(message):
   chat_data = database.return_chat_ranking()
   chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
@@ -45,6 +50,7 @@ async def chat_ranking(message):
   embed = Embed.make_embed(description=text)
   await message.channel.send(embed = embed)
 
+@bot.command()
 async def member(message):
   max_string_length = 0 # 動的に[=]の文字数を変更するための変数
   text = ""             # for文で作成するテキスト
@@ -97,40 +103,39 @@ async def member(message):
   embed = Embed.make_embed(description=output_text)
   await message.channel.send(embed = embed)
 
-# コマンドのルーティング
-async def router(message, command):
-  if command[1] == "help":
-    await help(message)
-  elif command[1] == "data" and len(command) == 3:
-    await data(message, command[2])
-  elif command[1] == "data-all":
-    await data_all(message)
-  elif command[1] == "chat-ranking":
-    await chat_ranking(message)
-  elif command[1] == "member":
-    await member(message)
-  else:
-    embed = Embed.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
-    await message.channel.send(embed = embed)
-
 # アドミンコマンドのルーティング
-async def admin_router(message, command):
-  if command[1] == "logout":
+@bot.command(name="admin")
+async def admin_router(ctx, arg = None):
+  # 引数の指定がない場合は無視
+  # TODO embedを出すべき
+  if arg is None: return
+
+  # 管理者以外には発動できない
+  if str(ctx.author.id) != Config.ADMIN_ID:
+    print("you are not admin")
+    return
+  # adminチャンネル以外では発動できない
+  if not ctx.channel.id == Config.ADMIN_CHANNEL_ID:
+    print("please try again in admin channel")
+    return
+  
+  if arg == "logout":
+    # ログアウト処理
     embed = Embed.make_embed("yellow", "終了します。")
-    channel = discord_client.get_channel(Config.BOT_LOG_CHANNEL_ID)
+    channel = bot.get_channel(Config.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
-    await discord_client.close()
+    await bot.close()
 
 # 起動時に動作する処理
-@discord_client.event
+@bot.event
 async def on_ready():
   print('Log in : Observer', flush = True)
   embed = Embed.make_embed("yellow", "起動しました。")
-  channel = discord_client.get_channel(Config.BOT_LOG_CHANNEL_ID)
+  channel = bot.get_channel(Config.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
-@discord_client.event
+@bot.event
 async def on_message(message):
   author = message.author
   content = message.content
@@ -138,19 +143,8 @@ async def on_message(message):
   # メッセージが空（写真）の場合
   if not content: return
   
-  content_split = list(map(str.lower ,content.split()))
-  
   # Botだった場合
   if author.bot: return
-  
-  # アドミンコマンドかの判定 & アドミンコマンドの実行
-  if content_split[0] == "admin" and len(content_split) >= 2:
-    if all([author.name == Config.ADMIN_ID, message.channel.id == Config.ADMIN_CHANNEL_ID]):
-      await admin_router(message, content_split)
-    return
-  
-  # アドミンサーバーの場合
-  if message.guild.id == Config.ADMIN_GUILD_ID: return
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name, content)
@@ -163,18 +157,19 @@ async def on_message(message):
     embed = Embed.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）")
     await message.channel.send(embed = embed)
   database.log()
-  
-  # コマンドがあるかの判定 & コマンドの実行
-  if content_split[0] == "observer" and len(content_split) >= 2:
-    await router(message, content_split)
-  elif content_split[0] == "observer":
-    embed = Embed.make_embed("red", "無効なコマンドです。\n`observer help`でヘルプを表示できます。")
+
+  # コマンドを実行 存在しなければエラー
+  ctx = await bot.get_context(message)
+  if ctx.command is None:
+    embed = Embed.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
     await message.channel.send(embed = embed)
+  else:
+    await bot.process_commands(message)
 
 def main():
   # Botの起動とDiscordサーバーへの接続
   try:
-    discord_client.run(Config.OBSERVER_TOKEN)
+    bot.run(Config.OBSERVER_TOKEN)
   finally: # サーバーを閉じた時（Ctrl + C）に動く処理
     database.close()
     print("Log out : Observer")
