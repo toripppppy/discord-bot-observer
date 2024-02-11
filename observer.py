@@ -106,7 +106,7 @@ async def on_message(message):
 
   # コマンドを実行 存在しなければエラー
   ctx = await bot.get_context(message)
-  if ctx.command is None:
+  if ctx.command is None and content.startswith(bot.command_prefix):
     embed = Embed.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
     await message.channel.send(embed = embed)
   else:
