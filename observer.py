@@ -22,7 +22,7 @@ async def help(message):
 # 指定のユーザーデータを表示
 @bot.command(name="data", brief="<user>に該当する人のデータを表示します")
 async def data(message, user):
-  data = database.return_data(user)
+  data = database.get_data(user)
   if data:
     embed = Utils.create_data_embed(data)
   else:
@@ -43,7 +43,7 @@ async def data_all(message):
 # チャットランキングを表示
 @bot.command(name="chat-ranking", brief="チャット数ランキングを表示します")
 async def chat_ranking(message):
-  chat_data = database.return_chat_ranking()
+  chat_data = database.get_chat_ranking()
   await message.channel.send(embed = Utils.create_chat_ranking_embed(chat_data))
 
 # メンバー一覧を表示
@@ -96,13 +96,11 @@ async def on_message(message):
   
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name, content)
-  level = database.return_level(author.name)
-  chat = database.return_chat(author.name)
-  length = database.return_length(author.name)
-  level_up_cnt = Utils.return_level_up_cnt(level, chat, length)
+  data = database.get_data(author.name)
+  level_up_cnt = Utils.get_level_up_cnt(data.level, data.chat, data.length)
   if level_up_cnt > 0: # レベルアップした場合
     database.update_level(author.name, level_up_cnt)
-    embed = Embed.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）")
+    embed = Embed.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{data.level} → Lv:{data.level+level_up_cnt}）")
     await message.channel.send(embed = embed)
   database.log()
 

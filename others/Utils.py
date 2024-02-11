@@ -12,7 +12,7 @@ def check_width(string) -> int:
       count += 1
   return count
 
-def return_level_up_cnt(level, chat, length):
+def get_level_up_cnt(level, chat, length):
   new_level = isqrt(chat + (length // 10))
   return new_level - level
 
