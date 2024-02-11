@@ -1,37 +1,38 @@
 import discord
-import Data
+from discord.ext import commands
+import Config
 import database_manager
-import Other
+from others import Embed, Utils
 
 # 接続に必要なオブジェクトを生成
-discord_client = discord.Client(intents=discord.Intents.all())
+bot = commands.Bot(
+  command_prefix="observer ",
+  intents=discord.Intents.all(),
+  help_command=None
+)
 
 # データベースの作成
-database = database_manager.Database(Data.MONGODB_URI, "discord", "user-data")
+database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
 
-# コマンドの関数
+# ヘルプ
+@bot.command(name="help", brief="ヘルプを表示します")
 async def help(message):
-  print("help")
-  embed = Other.make_embed()
-  for command, description in Data.OBSERVER_HELP_DICT.items():
-    embed.add_field(name = command, value = description, inline = False)
-  await message.channel.send(embed = embed)
+  await message.channel.send(embed = Utils.create_help_embed(bot))
 
-async def data(message, id):
-  data = database.return_data(id)
+# 指定のユーザーデータを表示
+@bot.command(name="data", brief="<user>に該当する人のデータを表示します")
+async def data(message, user):
+  data = database.get_data(user)
   if data:
-    text = str()
-    text += f"========== {data['name']} ==========\n"
-    text += f"・現在のポイント：{data['point']}\n"
-    text += f"・現在のレベル　：{data['level']}\n"
-    text += f"・合計チャット数：{data['chat']}\n"
-    text += f"・合計文字数　　：{data['length']}\n"
-    text += "="* (20 + len(data['name']))
-    embed = Other.make_embed(description=text)
+    embed = Utils.create_data_embed(data)
   else:
-    embed = Other.make_embed("red", f"「{id}」のデータは見つかりませんでした。")
+    # 指定のユーザーが見つからない場合はエラー
+    embed = Embed.make_embed("red", f"「{user}」のデータは見つかりませんでした。")
+    
   await message.channel.send(embed = embed)
 
+# ユーザーデータを全て表示
+@bot.command(name="data-all", brief="すべての人のデータを表示します")
 async def data_all(message):
   for member in message.guild.members:
     # Botだった場合
@@ -39,102 +40,50 @@ async def data_all(message):
     # data関数を呼び出す
     await data(message, member.name)
 
+# チャットランキングを表示
+@bot.command(name="chat-ranking", brief="チャット数ランキングを表示します")
 async def chat_ranking(message):
-  chat_data = database.return_chat_ranking()
-  chat_data = sorted(chat_data.items(), key=lambda x:x[1], reverse=True)
-  text = "===== チャット数ランキング =====\n"
-  for i, (name, chat) in enumerate(chat_data):
-    text += f"　第{i+1}位：{name}（{chat}回）\n"
-  text += "=" * (20 + 1 + len("チャット数ランキング"))
-  embed = Other.make_embed(description=text)
-  await message.channel.send(embed = embed)
+  chat_data = database.get_chat_ranking()
+  await message.channel.send(embed = Utils.create_chat_ranking_embed(chat_data))
 
+# メンバー一覧を表示
+@bot.command(name="member", brief="サーバーのメンバーを表示します")
 async def member(message):
-  max_string_length = 0 # 動的に[=]の文字数を変更するための変数
-  text = ""             # for文で作成するテキスト
-  output_text = ""      # 最終的に送信するテキスト
-  
-  for member in message.guild.members:
-    # Botだった場合
-    if member.bot: continue
-    
-    text += "・"
-    string_length = 2 # 最初に[・]の文字数分を足す
-    
-    # ニックネームがなかった場合
-    if member.nick == None:
-      text += member.name
-      string_length += Other.check_width(member.name)
-    else:
-      text += member.name + "「" + member.nick + "」"
-      string_length += Other.check_width(member.name + "「" + str(member.nick) + "」")
-    
-    # Role があったら記述する
-    role_list = [role.name for role in member.roles if role.name != "@everyone"]
-    role_text = ""
-    if len(role_list) != 0:
-      role_text += "［"
-      role_text += "  ".join(role_list)
-      role_text += "］\n"
-    else:
-      role_text += "\n"
-    
-    text += role_text
-    string_length += Other.check_width(role_text)
-    
-    # 最大文字数を更新
-    max_string_length = max(max_string_length, string_length)
-
-  # 最大文字数が奇数だった場合偶数にする
-  # これをしないと[=]の文字数が合わなくなる
-  if max_string_length % 2:
-    max_string_length += 1
-  
-  # [=]の文字数を計算
-  # -14 は " メンバー一覧 " の文字数
-  # // 2 は両端に [=] を付けるため
-  x = (max_string_length - 13) // 2
-  output_text += ("=" * x) + " メンバー一覧 " + ("=" * x) + "\n"
-  output_text += text
-  output_text += "=" * (max_string_length - 1)
-  
-  embed = Other.make_embed(description=output_text)
-  await message.channel.send(embed = embed)
-
-# コマンドのルーティング
-async def router(message, command):
-  if command[1] == "help":
-    await help(message)
-  elif command[1] == "data" and len(command) == 3:
-    await data(message, command[2])
-  elif command[1] == "data-all":
-    await data_all(message)
-  elif command[1] == "chat-ranking":
-    await chat_ranking(message)
-  elif command[1] == "member":
-    await member(message)
-  else:
-    embed = Other.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
-    await message.channel.send(embed = embed)
+  await message.channel.send(embed = Utils.create_member_list_embed(message))
 
 # アドミンコマンドのルーティング
-async def admin_router(message, command):
-  if command[1] == "logout":
-    embed = Other.make_embed("yellow", "終了します。")
-    channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
+@bot.command(name="admin", hidden=True)
+async def admin_router(ctx, arg = None):
+  # 引数の指定がない場合は無視
+  # TODO embedを出すべき
+  if arg is None: return
+
+  # 管理者以外には発動できない
+  if str(ctx.author.id) != Config.ADMIN_ID:
+    print("you are not admin")
+    return
+  # adminチャンネル以外では発動できない
+  if not ctx.channel.id == Config.ADMIN_CHANNEL_ID:
+    print("please try again in admin channel")
+    return
+  
+  if arg == "logout":
+    # ログアウト処理
+    embed = Embed.make_embed("yellow", "終了します。")
+    channel = bot.get_channel(Config.BOT_LOG_CHANNEL_ID)
     await channel.send(embed = embed)
-    await discord_client.close()
+    await bot.close()
 
 # 起動時に動作する処理
-@discord_client.event
+@bot.event
 async def on_ready():
   print('Log in : Observer', flush = True)
-  embed = Other.make_embed("yellow", "起動しました。")
-  channel = discord_client.get_channel(Data.BOT_LOG_CHANNEL_ID)
+  embed = Embed.make_embed("yellow", "起動しました。")
+  channel = bot.get_channel(Config.BOT_LOG_CHANNEL_ID)
   await channel.send(embed = embed)
 
 # メッセージ受信時に動作する処理
-@discord_client.event
+@bot.event
 async def on_message(message):
   author = message.author
   content = message.content
@@ -142,43 +91,31 @@ async def on_message(message):
   # メッセージが空（写真）の場合
   if not content: return
   
-  content_split = list(map(str.lower ,content.split()))
-  
   # Botだった場合
   if author.bot: return
   
-  # アドミンコマンドかの判定 & アドミンコマンドの実行
-  if content_split[0] == "admin" and len(content_split) >= 2:
-    if all([author.name == Data.ADMIN_ID, message.channel.id == Data.ADMIN_CHANNEL_ID]):
-      await admin_router(message, content_split)
-    return
-  
-  # アドミンサーバーの場合
-  if message.guild.id == Data.ADMIN_GUILD_ID: return
-  
   # メッセージ送信をした際のデータベース処理
   database.chat(author.name, content)
-  level = database.return_level(author.name)
-  chat = database.return_chat(author.name)
-  length = database.return_length(author.name)
-  level_up_cnt = Other.return_level_up_cnt(level, chat, length)
+  data = database.get_data(author.name)
+  level_up_cnt = Utils.get_level_up_cnt(data.level, data.chat, data.length)
   if level_up_cnt > 0: # レベルアップした場合
     database.update_level(author.name, level_up_cnt)
-    embed = Other.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{level} → Lv:{level+level_up_cnt}）")
+    embed = Embed.make_embed("green", f"{author.name}がレベルアップしました！（Lv:{data.level} → Lv:{data.level+level_up_cnt}）")
     await message.channel.send(embed = embed)
   database.log()
-  
-  # コマンドがあるかの判定 & コマンドの実行
-  if content_split[0] == "observer" and len(content_split) >= 2:
-    await router(message, content_split)
-  elif content_split[0] == "observer":
-    embed = Other.make_embed("red", "無効なコマンドです。\n`observer help`でヘルプを表示できます。")
+
+  # コマンドを実行 存在しなければエラー
+  ctx = await bot.get_context(message)
+  if ctx.command is None:
+    embed = Embed.make_embed("red", description="無効なコマンドです。\n`observer help`でヘルプを表示できます。")
     await message.channel.send(embed = embed)
+  else:
+    await bot.process_commands(message)
 
 def main():
   # Botの起動とDiscordサーバーへの接続
   try:
-    discord_client.run(Data.OBSERVER_TOKEN)
+    bot.run(Config.OBSERVER_TOKEN)
   finally: # サーバーを閉じた時（Ctrl + C）に動く処理
     database.close()
     print("Log out : Observer")
