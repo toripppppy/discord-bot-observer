@@ -74,6 +74,15 @@ async def admin_router(ctx, arg = None):
     await channel.send(embed = embed)
     await bot.close()
 
+@bot.command(name="WARZONE!", brief="WARZONE!")
+async def warzone(ctx: commands.Context):
+  """
+  observer WARZONE
+  ---
+  WARZONE!
+  """
+  await ctx.send("# WARZONE!\nhttps://youtu.be/uPySC2jFwhk?si=ic9uFb0mTRTqWsdt")
+
 # 起動時に動作する処理
 @bot.event
 async def on_ready():
