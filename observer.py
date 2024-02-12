@@ -81,7 +81,7 @@ async def warzone(ctx: commands.Context):
   ---
   WARZONE!
   """
-  await ctx.send("# WARZONE!\nhttps://youtu.be/uPySC2jFwhk?si=ic9uFb0mTRTqWsdt")
+  await ctx.send("# WARZONE!\nhttps://youtu.be/uPySC2jFwhk")
 
 # 起動時に動作する処理
 @bot.event
