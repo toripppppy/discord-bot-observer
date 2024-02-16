@@ -83,6 +83,21 @@ async def warzone(ctx: commands.Context):
   """
   await ctx.send("# WARZONE!\nhttps://youtu.be/uPySC2jFwhk")
 
+@bot.command(name="udiq", brief="udiqで知識を揃えよう")
+async def udiq(ctx: commands.Context, arg: str = None):
+  """
+  observer udiq
+  ---
+  udiqからランダムに出題
+  """
+  if arg == "":
+    # 出題
+    pass
+
+  elif arg == "add":
+    # 追加
+    pass
+
 # 起動時に動作する処理
 @bot.event
 async def on_ready():
