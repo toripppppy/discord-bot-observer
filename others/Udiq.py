@@ -72,22 +72,25 @@ class UdiqController:
     MongoDBの指定されたデータを更新する
     """
     # keyに対応するものが存在するならupdate、無ければinsert
-    if self.get_record(knowledge.word):
+    if self.get_knowledge(knowledge.word):
       self.collection.update_one({"word": knowledge.word}, {'$set':{'meaning': knowledge.meaning}})
 
     else:
       self.collection.insert_one({"word": knowledge.word, "meaning": knowledge.meaning})
 
 
-  def delete_db_udiq_record(self, key: str):
+  def delete_db_udiq_record(self, key: str) -> Knowledge | None:
     """
     MongoDBの指定されたデータを削除する
     """
-    if self.get_record(key):
+    knowledge = self.get_knowledge(key)
+
+    if knowledge:
       self.collection.delete_one({"word": key})
+      return knowledge
     else:
-      # TODO エラーのembedを表示
-      self.error_output("cannnot_find_db_udiq_record")
+      # keyが見つからない
+      return None
 
 
   ### botとのインターフェース
@@ -98,7 +101,7 @@ class UdiqController:
     return self.udiq
 
 
-  def get_record(self, key: str) -> Knowledge:
+  def get_knowledge(self, key: str) -> Knowledge:
     """
     UdiqControllerからkeyに対応したknowledgeを返す
     対応するものがなければNone
@@ -111,7 +114,7 @@ class UdiqController:
       return None
     
 
-  def append_record(self, word: str, meaning: str) -> Knowledge:
+  def append_knowledge(self, word: str, meaning: str) -> Knowledge:
     """
     {word : meaning}の組を新しく登録する
     keyが被ったら重複せずに更新する
