@@ -2,17 +2,18 @@ import discord
 from discord.ext import commands
 import Config
 import database_manager
-from others import Embed, Utils
+from others import Embed, Utils, UdiqController, ErrorManager
 
 # 接続に必要なオブジェクトを生成
 bot = commands.Bot(
-  command_prefix="observer ",
+  command_prefix="o ",
   intents=discord.Intents.all(),
   help_command=None
 )
 
 # データベースの作成
 database = database_manager.Database(Config.MONGODB_URI, "discord", "user-data")
+udiq_controller = UdiqController(Config.MONGODB_URI, "discord", "udiq")
 
 # ヘルプ
 @bot.command(name="help", brief="ヘルプを表示します")
@@ -82,21 +83,6 @@ async def warzone(ctx: commands.Context):
   WARZONE!
   """
   await ctx.send("# WARZONE!\nhttps://youtu.be/uPySC2jFwhk")
-
-@bot.command(name="udiq", brief="udiqで知識を揃えよう")
-async def udiq(ctx: commands.Context, arg: str = None):
-  """
-  observer udiq
-  ---
-  udiqからランダムに出題
-  """
-  if arg == "":
-    # 出題
-    pass
-
-  elif arg == "add":
-    # 追加
-    pass
 
 # 起動時に動作する処理
 @bot.event

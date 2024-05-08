@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 from pymongo.cursor import Cursor
 
+import random
+
 UDIQ_PATH = "data/udiq.json"
 
 class Knowledge:
@@ -21,13 +23,11 @@ class UdiqController:
   }
   の形で対応している
   """
-  def __init__(self, URI: str, db_name: str, col_name: str, error_output):
+  def __init__(self, URI: str, db_name: str, col_name: str):
     # MongoDB
     self.mongo_client = MongoClient(URI)
     self.database = self.mongo_client[db_name]
     self.collection = self.database[col_name]
-    # エラーの出力先
-    self.error_output = error_output
     # udiqを最初に一回読み込む
     self.udiq = dict()
     self.load_udiq()
@@ -51,7 +51,7 @@ class UdiqController:
     return db_udiq
   
 
-  def parse_db_udiq(self, db_udiq: Cursor) -> dict[str, str]:
+  def parse_db_udiq(self, db_udiq: Cursor) -> dict[str, Knowledge]:
     """
     Cursor型のudiqをdictにする
     """
@@ -94,7 +94,7 @@ class UdiqController:
 
 
   ### botとのインターフェース
-  def get_udiq(self) -> dict[str, str]:
+  def get_udiq(self) -> dict[str, Knowledge]:
     """
     UdiqControllerのudiqを返す
     """
@@ -112,6 +112,15 @@ class UdiqController:
       return Knowledge(key, meaning)
     else:
       return None
+    
+
+  def get_random_knowledge(self) -> Knowledge:
+    """
+    ランダムなKnowledgeを返す
+    """
+    udiq = self.get_udiq()
+    knowledge = random.choice(list(udiq.values()))
+    return knowledge
     
 
   def append_knowledge(self, word: str, meaning: str) -> Knowledge:
